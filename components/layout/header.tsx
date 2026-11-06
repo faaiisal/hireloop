@@ -62,7 +62,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-6 z-50 px-4 sm:px-6 lg:px-[60px]">
+    <header className="sticky top-6 z-50 mt-6 px-4 sm:px-6 lg:px-[60px]">
       <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between rounded-2xl bg-[#222222] pr-3 pl-4 md:h-[74px] md:pr-2 md:pl-6">
         <Logo />
 
