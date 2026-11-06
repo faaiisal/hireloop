@@ -15,7 +15,9 @@ import globe from "@/app/_assets/globe.webp"
  * Home hero — built from hireloop.fig > Design > Homepage ("Group 1" +
  * "Frame 2147234456" + stats "Frame 2147234448").
  *
- *  Artscape:   globe.webp (pink glow sky, starfield, planet) fills the top ~1882px
+ *  Artscape:   globe.webp for the planet/starfield body; top band is pure
+ *              CSS — solid #010103 base cover + rebuilt #DC02CE@50% wash
+ *              (figma "Exclude": 1840x851 @ y-70, blur 244)
  *  Eyebrow:    glass pill, Space Mono 20px
  *  H1:         Manrope Bold 56/64
  *  Subcopy:    Manrope 20px @ 70%
@@ -49,13 +51,28 @@ export function Hero() {
           so the art starts at page y=0 exactly like the figma.
           overflow-x-clip keeps the wide art from causing horizontal scroll
           while letting it escape above the section top. */}
-      <Image
-        src={globe}
-        alt=""
+      <div
         aria-hidden
-        priority
         className="pointer-events-none absolute -top-[88px] left-1/2 w-full max-w-none min-w-[1440px] -translate-x-1/2 md:-top-[98px]"
-      />
+      >
+        <Image
+          src={globe}
+          alt=""
+          aria-hidden
+          priority
+          className="h-auto w-full"
+        />
+        {/* C1: solid #010103 base cover over the webp's overbaked magenta band
+            (solid #DD00CF for the top ~350px). Solid until ~70%, then feathered
+            so there is no seam where the art already goes black on its own. */}
+        <div className="absolute inset-x-0 top-0 h-[24%] bg-gradient-to-b from-[#010103] via-[#010103] via-[65%] to-transparent" />
+        {/* C2: rebuilt Exclude wash — figma: 1840x851 @ page y-70, #DC02CE @
+            50% node opacity, 244px blur. The source shape is a boolean with
+            cutouts (not a filled ellipse) and the blur diffuses it widely,
+            so the effective peak is soft: low-alpha multi-stop falloff
+            instead of a concentrated core. Geometry in % of the art box. */}
+        <div className="absolute top-[-3.72%] left-1/2 h-[45.2%] w-[127.8%] max-w-none -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(220,2,206,0.30)_0%,rgba(220,2,206,0.10)_45%,rgba(220,2,206,0)_70%)] blur-[40px]" />
+      </div>
 
       <div className="relative z-10">
         {/* Hero content column: 784px wide, eyebrow lands at figma y=274

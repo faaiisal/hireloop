@@ -2,6 +2,8 @@ import {
   Geist,
   Geist_Mono,
   Instrument_Sans,
+  Inter,
+  Inter_Tight,
   Manrope,
   Plus_Jakarta_Sans,
   Space_Mono,
@@ -21,7 +23,8 @@ const fontMono = Geist_Mono({
 
 // Font roles extracted from hireloop.fig > Design > Homepage:
 // Manrope (headings/UI), Space Mono (eyebrow labels),
-// Plus Jakarta Sans (stat numerals), Instrument Sans (statements)
+// Plus Jakarta Sans (stat numerals), Instrument Sans (statements),
+// Inter (job-card copy), Inter Tight (job-card chips/labels)
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" })
 
 const spaceMono = Space_Mono({
@@ -40,6 +43,18 @@ const instrument = Instrument_Sans({
   variable: "--font-instrument",
 })
 
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-inter",
+})
+
+const interTight = Inter_Tight({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--font-inter-tight",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,6 +68,8 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         instrument.variable,
+        inter.variable,
+        interTight.variable,
         jakarta.variable,
         manrope.variable,
         spaceMono.variable,
