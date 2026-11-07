@@ -38,19 +38,26 @@ export default function SignUpPage() {
     const name = String(formData.get("name"))
     const email = String(formData.get("email"))
     const password = String(formData.get("password"))
+    const image = String(formData.get("image") ?? "").trim()
     // Password is deliberately not logged in full — length only.
     console.log("[auth] sign-up data collected:", {
       name,
       email,
       passwordLength: password.length,
+      image,
     })
 
     // ── Existing better-auth integration ────────────────────────────────
     // Comment this block out if you only want data collection for now.
+    // `image` is optional — omitted when the field is left blank.
+    // `callbackURL` must stay same-origin (external URLs are rejected);
+    // "/dashboard" matches the manual redirect below.
     const { error: authError } = await authClient.signUp.email({
       name,
       email,
       password,
+      ...(image ? { image } : {}),
+      callbackURL: "/dashboard",
     })
 
     if (authError) {
@@ -152,6 +159,27 @@ export default function SignUpPage() {
             <p className="font-inter text-xs text-white/40">
               Must be at least 8 characters.
             </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label
+              htmlFor="image"
+              className="font-display text-sm font-semibold text-white"
+            >
+              Profile image URL{" "}
+              <span className="font-inter font-normal text-white/40">
+                (optional)
+              </span>
+            </Label>
+            <Input
+              id="image"
+              name="image"
+              type="url"
+              autoComplete="photo"
+              placeholder="https://example.com/avatar.png"
+              disabled={pending}
+              className="h-12 rounded-xl border-white/15 bg-[#101010] px-4 font-inter text-white placeholder:text-white/40 focus-visible:border-[#5C53FE] focus-visible:ring-[#5C53FE]/25 md:text-[15px]"
+            />
           </div>
 
           {error && (
