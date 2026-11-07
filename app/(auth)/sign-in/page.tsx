@@ -45,9 +45,16 @@ export default function SignInPage() {
 
     // ── Existing better-auth integration ────────────────────────────────
     // Comment this block out if you only want data collection for now.
+    // `rememberMe: true` = persistent 7-day cookie (matches the session
+    // config in lib/auth.ts). `callbackURL` must stay same-origin and is
+    // the project's real route — "/dashboard", not "/app/dashboard".
+    // The client auto-navigates there on success; router.replace below
+    // is the explicit fallback (same pattern as the sign-up page).
     const { error: authError } = await authClient.signIn.email({
       email,
       password,
+      rememberMe: true,
+      callbackURL: "/dashboard",
     })
 
     if (authError) {
