@@ -1,3 +1,4 @@
+import { Cta } from "@/components/home/cta"
 import { Features } from "@/components/home/features"
 import { Hero } from "@/components/home/hero"
 import { Jobs } from "@/components/home/jobs"
@@ -10,6 +11,7 @@ export default function HomePage() {
       <Jobs />
       <Features />
       <Pricing />
+      <Cta />
     </main>
   )
 }

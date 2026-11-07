@@ -6,6 +6,7 @@ import {
   Inter_Tight,
   Manrope,
   Plus_Jakarta_Sans,
+  Rethink_Sans,
   Space_Mono,
 } from "next/font/google"
 
@@ -13,6 +14,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/components/layout/header"
 import { cn } from "@/lib/utils"
+import { Footer } from "@/components/layout/footer"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -55,6 +57,12 @@ const interTight = Inter_Tight({
   variable: "--font-inter-tight",
 })
 
+// CTA headline face — Rethink Sans Medium 64 per hireloop.fig "Group 2"
+const rethinkSans = Rethink_Sans({
+  subsets: ["latin"],
+  variable: "--font-rethink-sans",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -72,6 +80,7 @@ export default function RootLayout({
         interTight.variable,
         jakarta.variable,
         manrope.variable,
+        rethinkSans.variable,
         spaceMono.variable,
         "font-sans",
         geist.variable
@@ -81,6 +90,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Header />
           {children}
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

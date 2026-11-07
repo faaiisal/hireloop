@@ -167,7 +167,11 @@ export function Pricing() {
   const [yearly, setYearly] = useState(false)
 
   return (
-    <section aria-label="Pricing" className="relative">
+    <section
+      id="pricing"
+      aria-label="Pricing"
+      className="relative scroll-mt-28"
+    >
       <div className="mx-auto w-full max-w-[1440px] px-4 py-16 sm:px-6 md:py-[120px] lg:px-[60px]">
         {/* Section header — 488px block, centered per figma (x=476) */}
         <div className="mx-auto max-w-[488px] text-center">
