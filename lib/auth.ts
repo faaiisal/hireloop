@@ -24,9 +24,15 @@ export const auth = betterAuth({
   },
   user: {
     additionalFields: {
+      // Sign-up role: "seeker" | "recruiter" | "admin".
+      // `input: true` lets the client submit it (with `input: false` the
+      // value is silently dropped). `required: false` + `defaultValue`
+      // keep older accounts (created before this field) valid.
       role: {
-        type: ["sekker", "recruiter", "admin"],
-        input: false,
+        type: "string",
+        required: false,
+        defaultValue: "seeker",
+        input: true,
       },
     },
   },
@@ -41,13 +47,6 @@ export const auth = betterAuth({
   },
   // Google OAuth skipped for now — re-add socialProviders when
   // GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are configured.
-  socialProviders: {
-    google: {
-      // [!code highlight]
-      clientId: process.env.GOOGLE_CLIENT_ID as string, // [!code highlight]
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, // [!code highlight]
-    }, // [!code highlight]
-  },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     cookieCache: {

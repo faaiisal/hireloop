@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { Eye, EyeOff } from "lucide-react"
+import { Briefcase, Building2, Eye, EyeOff, ShieldCheck } from "lucide-react"
 
 import { AuthToggle } from "@/components/auth/auth-toggle"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,12 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/auth-client"
+
+const roles = [
+  { value: "seeker", label: "Seeker", Icon: Briefcase },
+  { value: "recruiter", label: "Recruiter", Icon: Building2 },
+  { value: "admin", label: "Admin", Icon: ShieldCheck },
+] as const
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -39,12 +45,14 @@ export default function SignUpPage() {
     const email = String(formData.get("email"))
     const password = String(formData.get("password"))
     const image = String(formData.get("image") ?? "").trim()
+    const role = String(formData.get("role") ?? "seeker")
     // Password is deliberately not logged in full — length only.
     console.log("[auth] sign-up data collected:", {
       name,
       email,
       passwordLength: password.length,
       image,
+      role,
     })
 
     // ── Existing better-auth integration ────────────────────────────────
@@ -52,12 +60,15 @@ export default function SignUpPage() {
     // `image` is optional — omitted when the field is left blank.
     // `callbackURL` must stay same-origin (external URLs are rejected);
     // "/dashboard" matches the manual redirect below.
+    // `role` is stored via user.additionalFields in lib/auth.ts
+    // ("seeker" | "recruiter" | "admin", defaults to "seeker").
     const { error: authError } = await authClient.signUp.email({
       name,
       email,
       password,
       ...(image ? { image } : {}),
       callbackURL: "/dashboard",
+      role,
     })
 
     if (authError) {
@@ -83,6 +94,29 @@ export default function SignUpPage() {
         <CardDescription className="font-inter text-[15px] leading-6 text-white/60">
           Join HireLoop and discover roles you&apos;d never find by searching.
         </CardDescription>
+          <fieldset className="grid gap-2">
+            <legend className="font-display text-sm font-semibold text-white align-left pb-4">
+              I am joining as
+            </legend>
+            <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-[#1F1F1F] p-1">
+              {roles.map(({ value, label, Icon }, index) => (
+                <label key={value} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value={value}
+                    defaultChecked={index === 0}
+                    disabled={pending}
+                    className="peer sr-only"
+                  />
+                  <span className="flex h-10 items-center justify-center gap-1.5 rounded-lg font-display text-sm font-semibold whitespace-nowrap text-white/60 transition-colors peer-checked:bg-[#5C53FE] peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[#5C53FE]/50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
+                    <Icon className="size-4" strokeWidth={1.5} />
+                    {label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-8 px-6 md:px-8">
