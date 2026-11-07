@@ -94,29 +94,29 @@ export default function SignUpPage() {
         <CardDescription className="font-inter text-[15px] leading-6 text-white/60">
           Join HireLoop and discover roles you&apos;d never find by searching.
         </CardDescription>
-          <fieldset className="grid gap-2">
-            <legend className="font-display text-sm font-semibold text-white align-left pb-4">
-              I am joining as
-            </legend>
-            <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-[#1F1F1F] p-1">
-              {roles.map(({ value, label, Icon }, index) => (
-                <label key={value} className="cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value={value}
-                    defaultChecked={index === 0}
-                    disabled={pending}
-                    className="peer sr-only"
-                  />
-                  <span className="flex h-10 items-center justify-center gap-1.5 rounded-lg font-display text-sm font-semibold whitespace-nowrap text-white/60 transition-colors peer-checked:bg-[#5C53FE] peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[#5C53FE]/50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
-                    <Icon className="size-4" strokeWidth={1.5} />
-                    {label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+        <fieldset className="grid gap-2">
+          <legend className="align-left pb-4 font-display text-sm font-semibold text-white">
+            I am joining as
+          </legend>
+          <div className="grid grid-cols-3 gap-1 rounded-xl border border-white/10 bg-[#1F1F1F] p-1">
+            {roles.map(({ value, label, Icon }, index) => (
+              <label key={value} className="cursor-pointer">
+                <input
+                  type="radio"
+                  name="role"
+                  value={value}
+                  defaultChecked={index === 0}
+                  disabled={pending}
+                  className="peer sr-only"
+                />
+                <span className="flex h-10 items-center justify-center gap-1.5 rounded-lg font-display text-sm font-semibold whitespace-nowrap text-white/60 transition-colors peer-checked:bg-[#5C53FE] peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-[#5C53FE]/50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50">
+                  <Icon className="size-4" strokeWidth={1.5} />
+                  {label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-8 px-6 md:px-8">
