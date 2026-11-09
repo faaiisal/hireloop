@@ -73,20 +73,20 @@ const menuItemsByRole: MenuItemsByRole = {
       icon: LayoutDashboard,
     },
     {
-      id: "seeker-browse",
-      name: "Browse Jobs",
+      id: "seeker-jobs",
+      name: "Jobs",
       url: "/dashboard/seeker/jobs",
       icon: Search,
     },
     {
       id: "seeker-saved",
-      name: "Saved Jobs",
+      name: "Save Jobs",
       url: "/dashboard/seeker/saved",
       icon: Bookmark,
     },
     {
       id: "seeker-applications",
-      name: "My Applications",
+      name: "Application",
       url: "/dashboard/seeker/applications",
       icon: ClipboardList,
     },
@@ -97,8 +97,8 @@ const menuItemsByRole: MenuItemsByRole = {
       icon: CreditCard,
     },
     {
-      id: "seeker-settings",
-      name: "Settings",
+      id: "seeker-setting",
+      name: "Setting",
       url: "/dashboard/seeker/settings",
       icon: Settings,
     },
@@ -111,38 +111,26 @@ const menuItemsByRole: MenuItemsByRole = {
       icon: LayoutDashboard,
     },
     {
-      id: "recruiter-company",
-      name: "My Company",
-      url: "/dashboard/recruiter/company",
-      icon: Building2,
-    },
-    {
       id: "recruiter-jobs",
       name: "Manage Jobs",
       url: "/dashboard/recruiter/jobs",
       icon: Briefcase,
     },
     {
-      id: "recruiter-post-job",
-      name: "Post a Job",
+      id: "recruiter-add-jobs",
+      name: "Add Jobs",
       url: "/dashboard/recruiter/jobs/new",
       icon: PlusCircle,
     },
     {
-      id: "recruiter-applicants",
-      name: "Applicants",
+      id: "recruiter-applications",
+      name: "Application",
       url: "/dashboard/recruiter/applicants",
-      icon: Users,
+      icon: ClipboardList,
     },
     {
-      id: "recruiter-billing",
-      name: "Billing",
-      url: "/dashboard/recruiter/billing",
-      icon: CreditCard,
-    },
-    {
-      id: "recruiter-settings",
-      name: "Settings",
+      id: "recruiter-setting",
+      name: "Setting",
       url: "/dashboard/recruiter/settings",
       icon: Settings,
     },
@@ -156,19 +144,19 @@ const menuItemsByRole: MenuItemsByRole = {
     },
     {
       id: "admin-users",
-      name: "Manage Users",
+      name: "Users",
       url: "/dashboard/admin/users",
       icon: Users,
     },
     {
       id: "admin-companies",
-      name: "Manage Companies",
+      name: "Companies",
       url: "/dashboard/admin/companies",
       icon: Building2,
     },
     {
       id: "admin-jobs",
-      name: "Manage Jobs",
+      name: "Jobs",
       url: "/dashboard/admin/jobs",
       icon: Briefcase,
     },
@@ -179,8 +167,8 @@ const menuItemsByRole: MenuItemsByRole = {
       icon: DollarSign,
     },
     {
-      id: "admin-settings",
-      name: "Settings",
+      id: "admin-setting",
+      name: "Setting",
       url: "/dashboard/admin/settings",
       icon: Settings,
     },
@@ -251,7 +239,7 @@ export function DashboardSidebar() {
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      render={<a href={item.url} />}
+                      render={<Link href={item.url} />}
                       className="data-[active=true]:bg-white/[0.08] data-[active=true]:text-white"
                     >
                       <item.icon />
@@ -273,7 +261,7 @@ export function DashboardSidebar() {
             <SidebarMenu>
               {publicNav.map((item) => (
                 <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton render={<a href={item.url} />}>
+                  <SidebarMenuButton render={<Link href={item.url} />}>
                     <item.icon />
                     <span>{item.name}</span>
                   </SidebarMenuButton>
@@ -283,7 +271,7 @@ export function DashboardSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
+{/* Footer Section */}
       <SidebarFooter className="border-t border-white/[0.06] p-2">
         <SidebarMenu>
           <SidebarMenuItem>

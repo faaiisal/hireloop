@@ -7,6 +7,7 @@ function ThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
+  // Avoid rendering an executable script inside this React component.
   return (
     <NextThemesProvider
       attribute="class"
@@ -14,6 +15,7 @@ function ThemeProvider({
       enableSystem
       disableTransitionOnChange
       {...props}
+      scriptProps={{ type: "text/plain" }}
     >
       <ThemeHotkey />
       {children}
