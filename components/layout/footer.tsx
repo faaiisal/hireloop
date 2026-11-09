@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 const columns = [
   {
@@ -69,6 +72,10 @@ function FooterLogo() {
  * middle purple #5C53FE, copyright 13px #ACABB2. Fixed to match.
  */
 export function Footer() {
+  const pathname = usePathname()
+  if (pathname?.startsWith("/dashboard")) {
+    return null
+  }
   return (
     <footer className="relative bg-[#010103] px-4 pb-8 pt-10 sm:px-6 lg:px-[60px]">
       <div className="mx-auto flex w-full max-w-[1320px] flex-col">

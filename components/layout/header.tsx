@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { MenuIcon } from "lucide-react"
 
 import {
@@ -15,44 +15,40 @@ import {
 } from "@/components/ui/sheet"
 import { authClient } from "@/lib/auth-client"
 
-/**
- * Design tokens extracted from hireloop.fig > Design > Homepage > navbar.
- *
- *  Bar:        1320x74, radius 16, bg #222222, logo 154x44 inset 24px
- *  Links:      white, 15px/medium, gap 40
- *  Divider:    1x24 #A8A8A8 @ 40%
- *  Sign In:    #5C53FE text
- *  CTA:        bg #5C53FE, radius 12, h 52, stroke #090A15/10,
- *              inner white top-highlight 20% blur 10 y 3
- */
-const navLinks = [
-  { label: "Browse Jobs", href: "/browse-jobs" },
-  { label: "Company", href: "/company" },
-  { label: "Pricing", href: "/pricing" },
-]
-
 function Logo({ className }: { className?: string }) {
   return (
     <Link href="/" aria-label="HireLoop home" className={className}>
-      {/* Brand asset extracted from hireloop.fig */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/hireloop-logo.png"
-        alt="HireLoop"
-        className="h-10 w-auto md:h-11"
-      />
+      <img src="/hireloop-logo.png" alt="HireLoop" className="h-10 w-auto md:h-11" />
     </Link>
   )
 }
 
-/**
- * The HireLoop header: logo, primary nav, divider and auth actions inside
- * one floating rounded bar (#222222, radius 16) per the Figma homepage.
- * Mobile-first: links collapse into a slide-down sheet below `md`.
- */
 export function Header() {
   const router = useRouter()
+  const pathname = usePathname()
   const { data: session } = authClient.useSession()
+
+  // Fix: hide global header entirely on dashboard routes.
+  // Before: header was rendered inside root layout + sidebar was rendered
+  // inside dashboard layout => duplicate logo/nav, floating header over sidebar
+  // (as seen in screenshot: two hireloop logos, header overlapping sidebar).
+  if (pathname?.startsWith("/dashboard")) {
+    return null
+  }
+
+  const role = (session?.user as { role?: string } | undefined)?.role || "seeker"
+
+  // Public nav + single dynamic Dashboard link (role based)
+  // Before: duplicate Dashboard - one in navLinks and another extra in auth block
+  // pointing to /dashboard (404). Now only one source of truth.
+  const navLinks = [
+    { label: "Browse Jobs", href: "/browse-jobs" },
+    { label: "Company", href: "/company" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Dashboard", href: `/dashboard/${role}` },
+  ]
+
   const user = session?.user
 
   async function handleSignOut() {
@@ -66,7 +62,7 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between rounded-2xl bg-[#222222] pr-3 pl-4 md:h-[74px] md:pr-2 md:pl-6">
         <Logo />
 
-        {/* Desktop: links + divider + auth (single bar, per Figma) */}
+        {/* Desktop */}
         <div className="hidden items-center md:flex">
           <nav className="flex items-center gap-10">
             {navLinks.map((link) => (
@@ -83,21 +79,13 @@ export function Header() {
           <span aria-hidden className="mx-6 h-6 w-px bg-[#A8A8A8]/40" />
 
           {user ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="flex h-[58px] items-center px-6 text-[15px] font-medium text-white transition-colors hover:text-white/70"
-              >
-                Dashboard
-              </Link>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="flex h-[52px] items-center rounded-xl border border-[#090A15]/10 bg-white/10 px-[22px] text-[15px] font-semibold text-white transition hover:bg-white/20"
-              >
-                Log out
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="flex h-[52px] items-center rounded-xl border border-[#090A15]/10 bg-white/10 px-[22px] text-[15px] font-semibold text-white transition hover:bg-white/20"
+            >
+              Log out
+            </button>
           ) : (
             <>
               <Link
@@ -116,7 +104,7 @@ export function Header() {
           )}
         </div>
 
-        {/* Mobile: hamburger + slide-down sheet with the same sections */}
+        {/* Mobile */}
         <Sheet>
           <SheetTrigger
             render={
@@ -129,11 +117,7 @@ export function Header() {
           >
             <MenuIcon className="size-5" />
           </SheetTrigger>
-          <SheetContent
-            side="top"
-            showCloseButton
-            className="rounded-b-2xl border-white/10 bg-[#222222] px-0"
-          >
+          <SheetContent side="top" showCloseButton className="rounded-b-2xl border-white/10 bg-[#222222] px-0">
             <SheetHeader>
               <SheetTitle className="sr-only">Menu</SheetTitle>
             </SheetHeader>
@@ -151,24 +135,15 @@ export function Header() {
             </nav>
             <SheetFooter className="p-4 pt-2">
               {user ? (
-                <>
-                  <SheetClose
-                    render={<Link href="/dashboard" />}
-                    nativeButton={false}
-                    className="flex h-11 items-center justify-center rounded-xl border border-white/15 text-[15px] font-medium text-white hover:bg-white/10"
-                  >
-                    Dashboard
-                  </SheetClose>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await handleSignOut()
-                    }}
-                    className="flex h-11 items-center justify-center rounded-xl bg-white/10 text-[15px] font-semibold text-white hover:bg-white/20"
-                  >
-                    Log out
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await handleSignOut()
+                  }}
+                  className="flex h-11 items-center justify-center rounded-xl bg-white/10 text-[15px] font-semibold text-white hover:bg-white/20"
+                >
+                  Log out
+                </button>
               ) : (
                 <>
                   <SheetClose
