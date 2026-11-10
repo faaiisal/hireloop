@@ -14,23 +14,7 @@ import {
   ArrowRight,
   Briefcase,
 } from "lucide-react"
-
-type JobType = "Full-time" | "Part-time" | "Contract" | "Internship"
-
-type FormData = {
-  jobTitle: string
-  companyName: string
-  jobCategory: string
-  jobType: JobType
-  isRemote: boolean
-  location: string
-  deadline: string
-  minSalary: string
-  maxSalary: string
-  frequency: string
-  keyResponsibilities: string
-  qualifications: string
-}
+import { createJob, JobFormData, JobType } from "@/lib/actions/jobs"
 
 const jobCategories = [
   "Engineering & Tech",
@@ -46,7 +30,7 @@ const jobCategories = [
 const frequencies = ["per hour", "per day", "per month", "per year"]
 
 export default function AddNewJobsPage() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<JobFormData>({
     jobTitle: "Frontend Developer",
     companyName: "HirePulse Network",
     jobCategory: "Engineering & Tech",
@@ -63,15 +47,36 @@ export default function AddNewJobsPage() {
       "• 3+ years of experience with React, TypeScript, and modern state architectures\n• Solid understanding of DOM performance and component-driven designs\n• Experience partnering closely with product teams and UI/UX designers",
   })
 
-  const update = (key: keyof FormData, value: string | boolean | JobType) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  const update = (key: keyof JobFormData, value: string | boolean | JobType) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Easy collection - no complicated validation, just log
-    console.log("Publish Job Data:", formData)
-    alert(`Job Published:\n${JSON.stringify(formData, null, 2)}`)
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault()
+    setIsSubmitting(true)
+    setMessage(null)
+
+    try {
+      // Easy collection - directly use state object
+      const result = await createJob(formData)
+      console.log("createJob Result:", result)
+
+      if (result.success) {
+        setMessage({ type: "success", text: `Job published! ID: ${result.insertedId}` })
+        // Optional: reset form or redirect
+        // router.push("/dashboard/recruiter/jobs")
+      } else {
+        setMessage({ type: "error", text: result.error || "Failed to publish" })
+      }
+    } catch (err) {
+      console.error(err)
+      setMessage({ type: "error", text: err instanceof Error ? err.message : "Something went wrong" })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -93,12 +98,26 @@ export default function AddNewJobsPage() {
             </p>
           </div>
           <Button
-            onClick={handleSubmit as unknown as () => void}
-            className="h-10 w-full shrink-0 rounded-xl bg-[#5C53FE] px-6 text-sm font-medium text-white hover:bg-[#4F45E8] md:w-auto"
+            type="button"
+            onClick={() => handleSubmit()}
+            disabled={isSubmitting}
+            className="h-10 w-full shrink-0 rounded-xl bg-[#5C53FE] px-6 text-sm font-medium text-white hover:bg-[#4F45E8] md:w-auto disabled:opacity-50"
           >
-            Publish Job <ArrowRight className="ml-1 size-4" />
+            {isSubmitting ? "Publishing..." : "Publish Job"} <ArrowRight className="ml-1 size-4" />
           </Button>
         </div>
+
+        {message && (
+          <div
+            className={`rounded-xl border px-4 py-3 text-sm ${
+              message.type === "success"
+                ? "border-green-500/20 bg-green-500/10 text-green-400"
+                : "border-red-500/20 bg-red-500/10 text-red-400"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -326,19 +345,22 @@ export default function AddNewJobsPage() {
         <div className="sticky bottom-0 -mx-4 border-t border-white/[0.06] bg-[#0A0A0A]/80 p-4 backdrop-blur md:hidden">
           <Button
             type="submit"
-            className="h-12 w-full rounded-xl bg-[#5C53FE] text-sm font-medium text-white hover:bg-[#4F45E8]"
+            disabled={isSubmitting}
+            className="h-12 w-full rounded-xl bg-[#5C53FE] text-sm font-medium text-white hover:bg-[#4F45E8] disabled:opacity-50"
           >
-            Publish Job <ArrowRight className="ml-2 size-4" />
+            {isSubmitting ? "Publishing..." : "Publish Job"} <ArrowRight className="ml-2 size-4" />
           </Button>
         </div>
 
         {/* Debug easy view */}
         <div className="hidden md:block">
-          <Button type="submit" className="h-11 rounded-xl bg-[#5C53FE] px-8 text-sm hover:bg-[#4F45E8]">
-            Publish Job <ArrowRight className="ml-2 size-4" />
+          <Button type="submit" disabled={isSubmitting} className="h-11 rounded-xl bg-[#5C53FE] px-8 text-sm hover:bg-[#4F45E8] disabled:opacity-50">
+            {isSubmitting ? "Publishing..." : "Publish Job"} <ArrowRight className="ml-2 size-4" />
           </Button>
         </div>
       </form>
     </div>
+
+  
   )
 }
