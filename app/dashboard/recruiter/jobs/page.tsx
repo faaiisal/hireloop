@@ -26,6 +26,7 @@ import {
   Plus,
 } from "lucide-react"
 import { JobFormData } from "@/lib/actions/jobs"
+import { getJobs } from "@/lib/api/manage-jobs"
 
 type TableJob = JobFormData & {
   _id: string
@@ -37,138 +38,124 @@ type TableJob = JobFormData & {
   applicantsText?: string
 }
 
-const dummyJobs: TableJob[] = [
-  {
-    _id: "1",
-    jobTitle: "Frontend Developer",
-    companyName: "HirePulse Network",
-    jobCategory: "Engineering",
-    jobType: "Full-time",
-    isRemote: true,
-    location: "New York, USA",
-    deadline: "May 30, 2025",
-    minSalary: "25",
-    maxSalary: "40",
-    frequency: "hr",
-    keyResponsibilities: "Build UI",
-    qualifications: "React exp",
-    deptIcon: Code2,
-    deptColor: "text-[#8B5CF6] bg-[#8B5CF6]/10",
-    applicants: 34,
-    status: "Active",
-    postedAgo: "Posted 4d ago",
-  },
-  {
-    _id: "2",
-    jobTitle: "Senior Product Designer",
-    companyName: "HirePulse Labs",
-    jobCategory: "Design",
-    jobType: "Full-time",
-    isRemote: false,
-    location: "London, UK",
-    deadline: "Jun 14, 2025",
-    minSalary: "90k",
-    maxSalary: "115k",
-    frequency: "yr",
-    keyResponsibilities: "Design systems",
-    qualifications: "Figma",
-    deptIcon: Palette,
-    deptColor: "text-orange-400 bg-orange-400/10",
-    applicants: 19,
-    status: "Active",
-    postedAgo: "Posted 1w ago",
-  },
-  {
-    _id: "3",
-    jobTitle: "DevOps Specialist",
-    companyName: "HirePulse Platform",
-    jobCategory: "Infrastructure",
-    jobType: "Full-time",
-    isRemote: false,
-    location: "Berlin, Germany",
-    deadline: "Jun 30, 2025",
-    minSalary: "95k",
-    maxSalary: "120k",
-    frequency: "yr",
-    keyResponsibilities: "CI/CD",
-    qualifications: "K8s",
-    deptIcon: Server,
-    deptColor: "text-cyan-400 bg-cyan-400/10",
-    applicants: 12,
-    status: "Active",
-    postedAgo: "Posted 2w ago",
-  },
-  {
-    _id: "4",
-    jobTitle: "Product Marketing Lead",
-    companyName: "HirePulse Network",
-    jobCategory: "Marketing",
-    jobType: "Full-time",
-    isRemote: true,
-    location: "EU/US",
-    deadline: "Jul 15, 2025",
-    minSalary: "80k",
-    maxSalary: "105k",
-    frequency: "yr",
-    keyResponsibilities: "GTM",
-    qualifications: "Marketing",
-    deptIcon: Megaphone,
-    deptColor: "text-white/60 bg-white/5",
-    applicants: 27,
-    status: "Active",
-    postedAgo: "Posted 5d ago",
-  },
-  {
-    _id: "5",
-    jobTitle: "QA Automation Engineer",
-    companyName: "HirePulse Platform",
-    jobCategory: "Quality",
-    jobType: "Part-time",
-    isRemote: false,
-    location: "Dublin, Ireland",
-    deadline: "May 01, 2025",
-    minSalary: "35",
-    maxSalary: "50",
-    frequency: "hr",
-    keyResponsibilities: "QA",
-    qualifications: "Automation",
-    deptIcon: Settings2,
-    deptColor: "text-white/40 bg-white/5",
-    applicants: 8,
-    status: "Expired",
-    postedAgo: "Closed",
-  },
-]
+// Real data on the backend will be fetched via mongodb 
+
 
 export default function ManageJobsPage() {
-  const [jobs, setJobs] = useState<TableJob[]>(dummyJobs)
-  const [mountedJobs, setMountedJobs] = useState<TableJob[]>([])
+  const [jobs, setJobs] = useState<TableJob[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulate loading stored jobs from new page (localStorage or real DB)
-  // In real app, replace with: const jobs = await getJobsByRecruiter()
+  // Helper: category -> icon/color like Figma
+  const getCategoryMeta = (category: string) => {
+    const c = category.toLowerCase()
+    if (c.includes("engineer")) return { icon: Code2, color: "text-[#8B5CF6] bg-[#8B5CF6]/10" }
+    if (c.includes("design")) return { icon: Palette, color: "text-orange-400 bg-orange-400/10" }
+    if (c.includes("infra") || c.includes("devops")) return { icon: Server, color: "text-cyan-400 bg-cyan-400/10" }
+    if (c.includes("market")) return { icon: Megaphone, color: "text-white/60 bg-white/5" }
+    if (c.includes("quality") || c.includes("qa")) return { icon: Settings2, color: "text-white/40 bg-white/5" }
+    return { icon: Code2, color: "text-[#8B5CF6] bg-[#8B5CF6]/10" }
+  }
+
+  const getPostedAgo = (createdAt?: string) => {
+    if (!createdAt) return ""
+    const diff = Date.now() - new Date(createdAt).getTime()
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    if (days <= 0) return "Posted today"
+    if (days === 1) return "Posted 1d ago"
+    if (days < 7) return `Posted ${days}d ago`
+    if (days < 30) return `Posted ${Math.floor(days / 7)}w ago`
+    return `Posted ${Math.floor(days / 30)}m ago`
+  }
+
+  // Fetch jobs from MongoDB via Server Action (direct, no CORS)
   useEffect(() => {
-    // Try to load from localStorage if user created jobs via new page (optional)
-    try {
-      const stored = localStorage.getItem("hireloop_created_jobs")
-      if (stored) {
-        const parsed: JobFormData[] = JSON.parse(stored)
-        const mapped: TableJob[] = parsed.map((j, i) => ({
-          ...j,
-          _id: `local-${i}`,
-          deptIcon: Code2,
-          deptColor: "text-[#8B5CF6] bg-[#8B5CF6]/10",
-          applicants: Math.floor(Math.random() * 30),
-          status: "Active" as const,
-          postedAgo: "Posted just now",
-        }))
-        setMountedJobs([...mapped, ...dummyJobs])
-        return
+    let cancelled = false
+
+    async function load() {
+      try {
+        setLoading(true)
+        const data = await getJobs() // now uses getDb() directly
+        if (cancelled) return
+
+        const mapped: TableJob[] = (Array.isArray(data) ? data : []).map((j: any, i: number) => {
+          const meta = getCategoryMeta(j.jobCategory || "")
+          // Status: Expired if deadline passed, else Active
+          let status: TableJob["status"] = "Active"
+          if (j.status) {
+            status = j.status === "Expired" ? "Expired" : "Active"
+          } else if (j.deadline) {
+            const dl = new Date(j.deadline)
+            if (!isNaN(dl.getTime()) && dl < new Date()) status = "Expired"
+          }
+
+          return {
+            ...j,
+            _id: typeof j._id === "string" ? j._id : j._id?.toString?.() ?? `job-${i}`,
+            deptIcon: meta.icon,
+            deptColor: meta.color,
+            applicants: typeof j.applicants === "number" ? j.applicants : 0,
+            status,
+            postedAgo: j.postedAgo || getPostedAgo(j.createdAt),
+          }
+        })
+
+        setJobs(mapped)
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to fetch jobs")
+      } finally {
+        if (!cancelled) setLoading(false)
       }
-    } catch {}
-    setMountedJobs(dummyJobs)
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const list = mountedJobs.length ? mountedJobs : jobs
+  const list = jobs
+
+  if (loading) {
+    return <div className="min-h-screen bg-[#0A0A0A] p-8 text-white/60">Loading jobs…</div>
+  }
+
+  if (error) {
+    return <div className="min-h-screen bg-[#0A0A0A] p-8 text-red-400">Failed to load jobs: {error}</div>
+  }
+
+  // Empty state when no real jobs in DB yet
+  if (list.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] text-white">
+        <div className="mb-6">
+          <div className="mb-1 flex items-center gap-2 text-xs text-white/40">
+            <span className="text-white/60">Manage Jobs</span>
+            <span>›</span>
+            <span className="text-[#8B83FF]">Job Listings & Postings</span>
+          </div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold md:text-[28px]">Manage Job Posts</h1>
+              <p className="mt-1 text-sm text-white/50">No jobs yet. Create your first listing.</p>
+            </div>
+            <Link href="/dashboard/recruiter/jobs/new">
+              <Button className="h-10 w-full rounded-xl bg-[#5C53FE] text-sm font-medium hover:bg-[#4F45E8] md:w-auto">
+                <Plus className="mr-1 size-4" /> New Job Post
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-dashed border-white/10 bg-[#111111] p-12 text-center">
+          <p className="text-white/60">No job posts found in MongoDB collection `jobs`.</p>
+          <p className="mt-2 text-sm text-white/30">Post a new job from the form, it will appear here instantly.</p>
+          <Link href="/dashboard/recruiter/jobs/new" className="mt-6 inline-block">
+            <Button className="bg-[#5C53FE] hover:bg-[#4F45E8]">Post a New Job</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">

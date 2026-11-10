@@ -1,4 +1,5 @@
 "use server"
+"use client"
 
 import { getDb } from "@/lib/mongodb"
 
@@ -51,22 +52,3 @@ export async function createJob(data: JobFormData) {
     }
   }
 }
-
-// Option B: If you still want to use external Express server on :8000, use this version
-// IMPORTANT: That server must have cors() and express.json() middleware (see fixed indes.ts below)
-// Uncomment to use external API instead of direct DB:
-
-// const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-
-// export const createJobExternal = async (data: JobFormData) => {
-//   const response = await fetch(`${BASE_URL}/jobs`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(data),
-//   })
-//   if (!response.ok) {
-//     const err = await response.text()
-//     throw new Error(`Server error ${response.status}: ${err}`)
-//   }
-//   return response.json()
-// }
